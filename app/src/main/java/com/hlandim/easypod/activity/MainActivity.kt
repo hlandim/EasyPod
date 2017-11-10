@@ -4,6 +4,7 @@ import android.app.FragmentManager
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import com.hlandim.easypod.R
+import com.hlandim.easypod.config.RetrofitInitializer
 import com.hlandim.easypod.fragment.PodCastListFragment
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -14,6 +15,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         supportFragmentManager
-                .beginTransaction().add(R.id.fragments_container, PodCastListFragment()).commit()
+                .beginTransaction()
+                .add(R.id.fragments_container, PodCastListFragment())
+                .commit()
     }
 }
