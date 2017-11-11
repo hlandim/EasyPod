@@ -26,7 +26,7 @@ class PodCastListFragment : Fragment() {
         podCastListViewModel = ViewModelProviders.of(this).get(PodCastListViewModel::class.java)
         podCastListViewModel?.getPodCastList()?.observe(activity, Observer<MutableList<PodCast>> { list ->
             list?.forEach { podCast ->
-                textPodCasts.text = textPodCasts.text.toString() + "/n" + podCast.title
+                textPodCasts.text = textPodCasts.text.toString() + "\n" + podCast.title
             }
         })
 

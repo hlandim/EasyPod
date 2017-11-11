@@ -28,12 +28,12 @@ class PodCastListViewModel : ViewModel() {
                 .subscribeOn(Schedulers.io())
                 .subscribe({ result ->
                     //println(result.title)
-                    listTmp!!.add(result)
+                    listTmp.add(result)
 
                 }, { error ->
                     error.printStackTrace()
                 }, {
-                    podCastList!!.value = listTmp
+                    podCastList.value = listTmp
                 })
     }
 
