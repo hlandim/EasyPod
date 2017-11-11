@@ -2,8 +2,8 @@ package com.hlandim.easypod.logic
 
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
-import com.hlandim.easypod.config.RetrofitInitializer
 import com.hlandim.easypod.domain.PodCast
+import com.hlandim.easypod.logic.web.audiosear.AudioSearApi
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
@@ -12,31 +12,29 @@ import io.reactivex.schedulers.Schedulers
  */
 class PodCastListViewModel : ViewModel() {
 
-    private var podCastList: MutableLiveData<List<PodCast>>? = null
+    private var podCastList: MutableLiveData<MutableList<PodCast>> = MutableLiveData()
+    private var listTmp: MutableList<PodCast> = mutableListOf()
 
-    fun getPodCastList(): MutableLiveData<List<PodCast>> {
-        if (podCastList == null) {
-            podCastList = MutableLiveData()
-        }
-        return podCastList!!
+    fun getPodCastList(): MutableLiveData<MutableList<PodCast>> {
+        return podCastList
     }
 
     fun search(value: String) {
-        RetrofitInitializer()
-                .podCastService()
-                .search(value, "583b42eadd74a7d5f101e47f1961acc8160f317817f42142742035cc94022a09")
+        listTmp.clear()
+        AudioSearApi
+                .instance
+                .search(value)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe({ result ->
-                    println(result.results_per_page)
+                    //println(result.title)
+                    listTmp!!.add(result)
+
                 }, { error ->
                     error.printStackTrace()
+                }, {
+                    podCastList!!.value = listTmp
                 })
-        //println(response)
-    }
-
-    override fun onCleared() {
-        super.onCleared()
     }
 
 }

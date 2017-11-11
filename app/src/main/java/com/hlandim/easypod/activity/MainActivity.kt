@@ -1,12 +1,12 @@
 package com.hlandim.easypod.activity
 
-import android.app.FragmentManager
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import com.hlandim.easypod.R
-import com.hlandim.easypod.config.RetrofitInitializer
 import com.hlandim.easypod.fragment.PodCastListFragment
-import kotlinx.android.synthetic.main.activity_main.*
+import com.hlandim.easypod.logic.web.audiosear.AudioSearApi
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 
 class MainActivity : AppCompatActivity() {
 
@@ -14,9 +14,22 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        supportFragmentManager
-                .beginTransaction()
-                .add(R.id.fragments_container, PodCastListFragment())
-                .commit()
+
+
+        AudioSearApi
+                .instance
+                .updateToken()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe({ result ->
+                    println(result)
+                }, { error ->
+                    error.printStackTrace()
+                }, {
+                    supportFragmentManager
+                            .beginTransaction()
+                            .add(R.id.fragments_container, PodCastListFragment())
+                            .commit()
+                })
     }
 }
