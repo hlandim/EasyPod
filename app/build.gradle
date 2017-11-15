@@ -51,4 +51,9 @@ dependencies {
 
     //ROBOLECTRIC
     testImplementation 'org.robolectric:robolectric:3.5.1'
+
+    //PkRSS - Feed Reader
+    implementation 'com.pkmmte.pkrss:pkrss:1.2'
+    implementation 'com.squareup.okhttp:okhttp:2.5.0'
+    implementation 'com.squareup.okhttp:okhttp-urlconnection:2.5.0'
 }

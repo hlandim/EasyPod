@@ -10,5 +10,6 @@ class PodCast(
         var title: String = "",
         var description: String = "",
         var imgFullUrl: String = "",
-        var imgThumbUrl: String = ""
+        var imgThumbUrl: String = "",
+        var signed: Boolean = false
 )
