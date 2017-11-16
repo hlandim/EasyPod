@@ -13,9 +13,17 @@ import kotlinx.android.synthetic.main.podcast_list_item.view.*
 /**
  * Created by hlandim on 15/11/17.
  */
-class PodCastListAdapter(var list: List<PodCast>, private val context: Context) : RecyclerView.Adapter<PodCastListAdapter.ListHolder>() {
+class PodCastListAdapter(var list: List<PodCast>, private val context: Context, val listner: PodCastListListener) : RecyclerView.Adapter<PodCastListAdapter.ListHolder>() {
+
+    var isListLayout = true
+
+    companion object {
+        val LIST_ITEM = 0
+        val GRID_ITEM = 1
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ListHolder {
+
         val view = LayoutInflater.from(context).inflate(R.layout.podcast_list_item, parent, false)
         return PodCastListAdapter.ListHolder(view)
     }
@@ -23,6 +31,7 @@ class PodCastListAdapter(var list: List<PodCast>, private val context: Context) 
     override fun onBindViewHolder(holder: ListHolder?, position: Int) {
         val podCast = list[position]
         Glide.with(context).load(podCast.imgThumbUrl).into(holder?.img)
+        holder?.itemView?.setOnClickListener { listner.onPodCastClicked(podCast) }
     }
 
     override fun getItemCount(): Int = list.size
@@ -32,9 +41,22 @@ class PodCastListAdapter(var list: List<PodCast>, private val context: Context) 
         val img = itemView.img_thumb
     }
 
-    fun update(newList: List<PodCast>){
+    fun update(newList: List<PodCast>) {
         list = newList
         notifyDataSetChanged()
+    }
+
+    override fun getItemViewType(position: Int): Int = when (isListLayout) {
+        true -> LIST_ITEM
+        false -> GRID_ITEM
+    }
+
+    fun changeLayout(isListLayout: Boolean) {
+
+    }
+
+    interface PodCastListListener {
+        fun onPodCastClicked(podCast: PodCast)
     }
 
 }

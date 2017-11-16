@@ -1,17 +1,20 @@
 package com.hlandim.easypod.activity
 
-import android.content.Intent
 import android.os.Bundle
+import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import com.hlandim.easypod.R
-import com.hlandim.easypod.activity.search.SearchActivity
 import com.hlandim.easypod.fragment.PodCastListFragment
 import kotlinx.android.synthetic.main.toolbar.*
 
 
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        val FRAGMENT_TAG = "fragment_tag"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,7 +23,7 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(my_toolbar)
         supportFragmentManager
                 .beginTransaction()
-                .add(R.id.fragments_container, PodCastListFragment())
+                .add(R.id.fragments_container, PodCastListFragment(), FRAGMENT_TAG)
                 .commit()
 
     }
@@ -30,13 +33,10 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean = when (item?.itemId) {
-        R.id.action_add_podcast -> {
-            val intent = Intent(this, SearchActivity::class.java)
-            startActivity(intent)
-            true
-        }
-        else -> super.onOptionsItemSelected(item)
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        val actualFragment
+                : Fragment = supportFragmentManager.findFragmentByTag(FRAGMENT_TAG)
+        return actualFragment?.onOptionsItemSelected(item)
     }
 
 

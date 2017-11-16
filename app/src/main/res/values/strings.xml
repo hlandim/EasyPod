@@ -2,4 +2,6 @@
     <string name="app_name">EasyPod</string>
     <string name="search_hint">Procure um PodCast</string>
     <string name="add_podcast">Adicione um PodCast</string>
+    <string name="podcast_list_layout_list">Lista</string>
+    <string name="podcast_list_layout_grid">Grid</string>
 </resources>
