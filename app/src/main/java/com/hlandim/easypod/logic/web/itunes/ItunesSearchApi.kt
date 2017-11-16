@@ -44,12 +44,15 @@ class ItunesSearchApi {
         return service
                 .search(value, mediaType, entity)
                 .flatMap { result -> Observable.fromIterable(result.results) }
+                .filter { it.feedUrl != null && it.feedUrl.isNotEmpty() && it.feedUrl.isNotBlank() }
                 .map { pc ->
                     PodCast(idApi = pc.collectionId,
                             title = pc.artistName,
                             description = pc.collectionName,
                             imgFullUrl = pc.artworkUrl600,
-                            imgThumbUrl = pc.artworkUrl30)
+                            imgThumbUrl = pc.artworkUrl100,
+                            feedUrl = pc.feedUrl,
+                            signed = false)
                 }
     }
 }

@@ -1,11 +1,10 @@
-package com.hlandim.easypod.activity
+package com.hlandim.easypod.activity.search
 
 import android.app.SearchManager
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -14,31 +13,39 @@ import android.support.v7.widget.SearchView
 import android.view.Menu
 import android.widget.EditText
 import com.hlandim.easypod.R
+import com.hlandim.easypod.dao.DataBaseUtils
 import com.hlandim.easypod.domain.PodCast
 import com.hlandim.easypod.logic.PodCastListViewModel
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.android.synthetic.main.toolbar.*
 
-class SearchActivity : AppCompatActivity() {
+
+class SearchActivity : AppCompatActivity(), SearchListAdapter.SearchListListener {
 
     var podCastListViewModel: PodCastListViewModel? = null
-    val adapter: SearchListAdapter = SearchListAdapter(mutableListOf(), this)
+    val adapter: SearchListAdapter = SearchListAdapter(mutableListOf(), this, this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
         setSupportActionBar(my_toolbar)
+        configureList()
+        configureViewModel()
+    }
 
-
-        search_result_list.adapter = adapter
-        val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        search_result_list.layoutManager = layoutManager
+    private fun configureViewModel() {
         podCastListViewModel = ViewModelProviders.of(this).get(PodCastListViewModel::class.java)
         podCastListViewModel?.getPodCastList()?.observe(this, Observer<MutableList<PodCast>> { list ->
             if (list != null) {
                 adapter.updateList(list)
             }
         })
+    }
+
+    private fun configureList() {
+        search_result_list.adapter = adapter
+        val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        search_result_list.layoutManager = layoutManager
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -75,11 +82,8 @@ class SearchActivity : AppCompatActivity() {
         })
     }
 
-    override fun onSearchRequested(): Boolean {
-        return super.onSearchRequested()
+    override fun addPodCast(podCast: PodCast) {
+        DataBaseUtils.getAppDataBase(applicationContext).podCastDao().insert(podCast)
     }
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-    }
 }
