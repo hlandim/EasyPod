@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         val actualFragment
                 : Fragment = supportFragmentManager.findFragmentByTag(FRAGMENT_TAG)
-        return actualFragment?.onOptionsItemSelected(item)
+        return actualFragment.onOptionsItemSelected(item)
     }
 
 

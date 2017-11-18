@@ -14,5 +14,5 @@ data class SearchItemResponse(val collectionId: Long,
                               val artworkUrl60: String,
                               val artworkUrl600: String,
                               val collectionName: String,
-                              val feedUrl: String,
+                              val feedUrl: String?,
                               val releaseDate: String)

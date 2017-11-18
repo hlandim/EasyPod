@@ -13,6 +13,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
     }
     testOptions {
         unitTests {
@@ -44,7 +45,6 @@ dependencies {
 
     //ROOM
     implementation "android.arch.persistence.room:runtime:1.0.0"
-    annotationProcessor "android.arch.persistence.room:compiler:1.0.0"
     kapt "android.arch.persistence.room:compiler:1.0.0"
 
     //RETROFIT + GSON

@@ -12,7 +12,7 @@ class DataBaseUtils {
         val dataBaseName: String = "easypod-db"
         fun getAppDataBase(context: Context): AppDataBase {
             return Room.databaseBuilder(context,
-                    AppDataBase::class.java, "easypod-db")
+                    AppDataBase::class.java, dataBaseName)
                     .allowMainThreadQueries()
                     .build()
         }

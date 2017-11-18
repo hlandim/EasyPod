@@ -51,7 +51,7 @@ class ItunesSearchApi {
                             description = pc.collectionName,
                             imgFullUrl = pc.artworkUrl600,
                             imgThumbUrl = pc.artworkUrl100,
-                            feedUrl = pc.feedUrl,
+                            feedUrl = pc.feedUrl!!,
                             signed = false)
                 }
     }
