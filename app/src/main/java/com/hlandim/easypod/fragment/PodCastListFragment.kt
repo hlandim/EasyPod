@@ -39,8 +39,6 @@ class PodCastListFragment : Fragment(), PodCastListAdapter.PodCastListListener {
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater?.inflate(R.layout.fragment_pod_cast_list, container, false)
 
-
-
         episodeListViewModel = ViewModelProviders.of(this).get(EpisodeListViewModel::class.java)
         podCastListViewModel = ViewModelProviders.of(this).get(PodCastListViewModel::class.java)
         podCastListViewModel?.getPodCastList()?.observe(activity, Observer<MutableList<PodCast>> { list ->
@@ -144,5 +142,10 @@ class PodCastListFragment : Fragment(), PodCastListAdapter.PodCastListListener {
 
     override fun onPodCastClicked(podCast: PodCast) {
         Toast.makeText(activity, "Wait for it!!", Toast.LENGTH_LONG).show()
+    }
+
+    override fun onPodCastRemoveClicked(podCast: PodCast) {
+        episodeListViewModel?.deleteAllFromPodCast(podCast)
+        podCastListViewModel?.delete(podCast)
     }
 }

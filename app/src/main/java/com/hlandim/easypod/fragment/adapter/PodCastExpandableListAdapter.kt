@@ -28,6 +28,12 @@ class PodCastExpandableListAdapter(var list: MutableList<EpisodeListViewModel.Po
             convertView
         }
 
+        if (isExpanded) {
+            view.img_arrow.setImageResource(R.drawable.arrow_close)
+        } else {
+            view.img_arrow.setImageResource(R.drawable.arrow_open)
+        }
+
         Glide.with(context).load(podCast.imgThumbUrl).into(view.img_logo)
         view.tv_title.text = podCast.title
 

@@ -21,7 +21,16 @@ class PodCastListViewModel(application: Application) : AndroidViewModel(applicat
     fun getPodCastList(): MutableLiveData<MutableList<PodCast>> = podCastList
 
     fun listSubscribedPodCasts() {
-        podCastList.value = DataBaseUtils.getAppDataBase(getApplication()).podCastDao().getAll() as MutableList<PodCast>
+        podCastList.value = getDao().getAll() as MutableList<PodCast>
+    }
+
+    fun delete(podCast: PodCast) {
+        val index = podCastList.value?.indexOf(podCast) as Int
+        if (index != -1) {
+            getDao().delete(podCast)
+            podCastList.value?.removeAt(index)
+            podCastList.value = podCastList.value
+        }
     }
 
     fun search(value: String) {
@@ -40,7 +49,7 @@ class PodCastListViewModel(application: Application) : AndroidViewModel(applicat
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeOn(Schedulers.io())
                         .subscribe({ result ->
-                            val podCastDb: PodCast? = DataBaseUtils.getAppDataBase(getApplication()).podCastDao().getByApiId(result.idApi)
+                            val podCastDb: PodCast? = getDao().getByApiId(result.idApi)
                             result.signed = podCastDb != null
                             listTmp.add(result)
 
@@ -53,5 +62,7 @@ class PodCastListViewModel(application: Application) : AndroidViewModel(applicat
             }
         }
     }
+
+    private fun getDao() = DataBaseUtils.getAppDataBase(getApplication()).podCastDao()
 
 }

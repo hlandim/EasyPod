@@ -33,4 +33,7 @@ interface EpisodeDao {
 
     @Delete
     fun delete(episode: Episode)
+
+    @Query("DELETE FROM ${Episode.TABLE_NAME} where podcast_id = :arg0")
+    fun deleteAllFromPodCast(podCastId: Long)
 }

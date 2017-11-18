@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import com.bumptech.glide.Glide
 import com.hlandim.easypod.R
 import com.hlandim.easypod.domain.PodCast
@@ -28,6 +29,19 @@ class PodCastListAdapter(var list: List<PodCastSync>, private val context: Conte
         Glide.with(context).load(podCast.imgThumbUrl).into(holder?.img)
         holder?.itemView?.setOnClickListener { listener.onPodCastClicked(podCast) }
         holder?.pbSync?.visibility = if (podCastSync.isSyncing) View.VISIBLE else View.GONE
+
+        holder?.itemView?.setOnLongClickListener { view ->
+            val popUpMenu = PopupMenu(view.context, view)
+            popUpMenu.inflate(R.menu.podcast_list_popup_menu)
+            popUpMenu.setOnMenuItemClickListener { menuItem ->
+                when (menuItem.itemId) {
+                    R.id.popup_menu_remove -> listener.onPodCastRemoveClicked(podCast)
+                }
+                true
+            }
+            popUpMenu.show()
+            true
+        }
     }
 
     override fun getItemCount(): Int = list.size
@@ -54,6 +68,7 @@ class PodCastListAdapter(var list: List<PodCastSync>, private val context: Conte
 
     interface PodCastListListener {
         fun onPodCastClicked(podCast: PodCast)
+        fun onPodCastRemoveClicked(podCast: PodCast)
     }
 
     data class PodCastSync(val podCast: PodCast, var isSyncing: Boolean = true) {

@@ -5,6 +5,7 @@ import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
 import android.util.Log
 import com.hlandim.easypod.dao.DataBaseUtils
+import com.hlandim.easypod.dao.EpisodeDao
 import com.hlandim.easypod.domain.Episode
 import com.hlandim.easypod.domain.PodCast
 import com.pkmmte.pkrss.Article
@@ -27,6 +28,9 @@ class EpisodeListViewModel(application: Application) : AndroidViewModel(applicat
         val TAG: String = EpisodeListViewModel::class.java.simpleName
     }
 
+    fun deleteAllFromPodCast(podCast: PodCast) {
+        getDao().deleteAllFromPodCast(podCast.id)
+    }
 
     fun fetchEpisodes(podCasts: List<PodCast>, forceSync: Boolean) {
         this.forceSync = forceSync
@@ -87,7 +91,7 @@ class EpisodeListViewModel(application: Application) : AndroidViewModel(applicat
 
         val pcEp = if (episodes != null) {
             episodes.forEach { ep ->
-                val epDao = DataBaseUtils.getAppDataBase(getApplication()).episodeDao()
+                val epDao = getDao()
                 val epDb = epDao.getByTitle(ep.title)
                 if (epDb != null) {
                     ep.id = epDb.id
@@ -102,6 +106,8 @@ class EpisodeListViewModel(application: Application) : AndroidViewModel(applicat
         podCastEpisodes.value = pcEp
         checkNextPodCastEpisodes()
     }
+
+    private fun getDao(): EpisodeDao = DataBaseUtils.getAppDataBase(getApplication()).episodeDao()
 
     private fun checkNextPodCastEpisodes() {
         indexFetched++
