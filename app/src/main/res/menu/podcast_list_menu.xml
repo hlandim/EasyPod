@@ -8,15 +8,9 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/action_change_layout_list"
+        android:id="@+id/action_change_list_layout"
         android:icon="@drawable/view_list"
         android:title="@string/podcast_list_layout_list"
-        app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/action_change_layout_grid"
-        android:icon="@drawable/view_list"
-        android:title="@string/podcast_list_layout_list"
-        android:visible="false"
         app:showAsAction="ifRoom" />
 
 

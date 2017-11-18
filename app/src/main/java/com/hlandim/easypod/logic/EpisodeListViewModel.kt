@@ -46,6 +46,7 @@ class EpisodeListViewModel(application: Application) : AndroidViewModel(applicat
             getFeed(podCast)
         } else {
             val episodes = DataBaseUtils.getAppDataBase(getApplication()).episodeDao().getByPodCast(podCastId = podCast.id)
+            Log.d(TAG, "${podCast.title} - episodes from database: ${episodes.size}")
             if (episodes.isNotEmpty()) {
                 val pcEp = PodCastEpisodes(podCast, episodes)
                 podCastEpisodesTmp.add(pcEp)
@@ -59,6 +60,7 @@ class EpisodeListViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     private fun getFeed(podCast: PodCast) {
+        Log.d(TAG, "Fetching episodes from ${podCast.title} - ${podCast.feedUrl}")
         PkRSS.with(getApplication()).load(podCast.feedUrl).callback(this).async()
     }
 
@@ -72,19 +74,21 @@ class EpisodeListViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     override fun onLoaded(newArticles: MutableList<Article>?) {
-        Log.d(TAG, "PKRSS - " + newArticles?.size)
         val podCast = podCastList[indexFetched]
         val episodes: List<Episode>? = newArticles?.take(5)?.map { article ->
             Episode(id = 0,
                     idApi = article.id.toLong(),
                     podCastId = podCast.id,
-                    title = article.title)
+                    title = article.title,
+                    description = article.description,
+                    mimeType = article.enclosure.mimeType,
+                    url = article.enclosure.url)
         }
 
         val pcEp = if (episodes != null) {
             episodes.forEach { ep ->
                 val epDao = DataBaseUtils.getAppDataBase(getApplication()).episodeDao()
-                val epDb = epDao.getByApiId(ep.idApi)
+                val epDb = epDao.getByTitle(ep.title)
                 if (epDb != null) {
                     ep.id = epDb.id
                 }

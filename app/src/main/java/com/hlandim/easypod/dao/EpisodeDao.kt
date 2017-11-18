@@ -22,6 +22,9 @@ interface EpisodeDao {
     @Query("SELECT * FROM ${Episode.TABLE_NAME} WHERE id_api = :arg0 LIMIT 1")
     fun getByApiId(id: Long): Episode?
 
+    @Query("SELECT * FROM ${Episode.TABLE_NAME} WHERE title = :arg0 LIMIT 1")
+    fun getByTitle(title: String): Episode?
+
     @Query("SELECT * FROM ${Episode.TABLE_NAME} WHERE podcast_id = :arg0")
     fun getByPodCast(podCastId: Long): List<Episode>
 

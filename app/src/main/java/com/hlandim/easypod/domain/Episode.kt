@@ -13,12 +13,19 @@ import com.hlandim.easypod.domain.Episode.Companion.TABLE_NAME
 class Episode(@PrimaryKey(autoGenerate = true) var id: Long = 0,
               @ColumnInfo(name = "id_api") var idApi: Long = 0,
               @ColumnInfo(name = "title") var title: String = "",
-              @ColumnInfo(name = "podcast_id") var podCastId: Long) {
+              @ColumnInfo(name = "podcast_id") var podCastId: Long,
+              @ColumnInfo(name = "description") var description: String,
+              @ColumnInfo(name = "mime_type") var mimeType: String,
+              @ColumnInfo(name = "url") var url: String
+) {
 
     constructor() : this(id = 0,
             idApi = 0,
             title = "",
-            podCastId = 0)
+            podCastId = 0,
+            description = "",
+            mimeType = "",
+            url = "")
 
     companion object {
         const val TABLE_NAME: String = "Episode"

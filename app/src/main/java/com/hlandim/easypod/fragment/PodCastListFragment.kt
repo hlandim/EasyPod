@@ -8,10 +8,7 @@ import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.GridLayoutManager
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
 import com.hlandim.easypod.R
 import com.hlandim.easypod.activity.search.SearchActivity
@@ -59,20 +56,26 @@ class PodCastListFragment : Fragment(), PodCastListAdapter.PodCastListListener {
         })
         episodeListViewModel?.podCastEpisodes?.observe(activity, Observer<EpisodeListViewModel.PodCastEpisodes> { pcEps ->
             if (pcEps != null) {
-                Log.i(TAG, pcEps.podCast.title)
                 adapterExpandable?.update(pcEps)
                 adapterList?.finishSync(pcEps.podCast)
             }
         })
+        setHasOptionsMenu(true)
         retainInstance = true
         return view
+    }
+
+
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        menu?.clear()
+        activity.menuInflater.inflate(R.menu.podcast_list_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
 
         when (item?.itemId) {
-            R.id.action_change_layout_grid,
-            R.id.action_change_layout_list -> {
+            R.id.action_change_list_layout -> {
                 if (isListViewMode) {
                     item.icon = ContextCompat.getDrawable(activity, R.drawable.view_grid)
                     podcast_list_grid.visibility = View.GONE
@@ -109,9 +112,6 @@ class PodCastListFragment : Fragment(), PodCastListAdapter.PodCastListListener {
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         configurePodCastList()
-
-
-
         configureFabAddButtom()
     }
 
@@ -127,6 +127,13 @@ class PodCastListFragment : Fragment(), PodCastListAdapter.PodCastListListener {
         podcast_list_grid.adapter = adapterList
         val layoutManager = GridLayoutManager(this.context, 4)
         podcast_list_grid.layoutManager = layoutManager
+        if (isListViewMode) {
+            podcast_list_grid.visibility = View.VISIBLE
+            podcast_expandable_list.visibility = View.GONE
+        } else {
+            podcast_list_grid.visibility = View.GONE
+            podcast_expandable_list.visibility = View.VISIBLE
+        }
     }
 
 
