@@ -3,6 +3,7 @@ package com.hlandim.easypod.logic
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
+import android.util.Log
 import com.hlandim.easypod.dao.DataBaseUtils
 import com.hlandim.easypod.domain.Episode
 import com.hlandim.easypod.domain.PodCast
@@ -15,41 +16,63 @@ import com.pkmmte.pkrss.PkRSS
  */
 class EpisodeListViewModel(application: Application) : AndroidViewModel(application), Callback {
 
-    var podCastEpisodes: MutableLiveData<MutableSet<PodCastEpisodes>> = MutableLiveData()
+    var podCastEpisodes: MutableLiveData<PodCastEpisodes> = MutableLiveData()
     private var podCastEpisodesTmp: MutableSet<PodCastEpisodes> = mutableSetOf()
     private var indexFetched: Int = 0
     private var podCastList: List<PodCast> = listOf()
+    private var forceSync: Boolean = false
+    var isUpdating: Boolean = false
 
+    companion object {
+        val TAG: String = EpisodeListViewModel::class.java.simpleName
+    }
+
+
+    fun fetchEpisodes(podCasts: List<PodCast>, forceSync: Boolean) {
+        this.forceSync = forceSync
+        fetchEpisodes(podCasts)
+    }
 
     fun fetchEpisodes(podCasts: List<PodCast>) {
         indexFetched = 0
         podCastList = podCasts
-        getEpisodes(podCasts[indexFetched])
+        isUpdating = true
+        fetchEpisodes(podCasts[indexFetched])
 
     }
 
-    private fun getEpisodes(podCast: PodCast) {
-
-        val episodes = DataBaseUtils.getAppDataBase(getApplication()).episodeDao().getByPodCast(podCastId = podCast.id)
-        if (episodes.isNotEmpty()) {
-            podCastEpisodesTmp.add(PodCastEpisodes(podCast, episodes))
-            checkNextPodCastEpisodes()
+    fun fetchEpisodes(podCast: PodCast) {
+        if (forceSync) {
+            getFeed(podCast)
         } else {
-            PkRSS.with(getApplication()).load(podCast.feedUrl).callback(this).async()
+            val episodes = DataBaseUtils.getAppDataBase(getApplication()).episodeDao().getByPodCast(podCastId = podCast.id)
+            if (episodes.isNotEmpty()) {
+                val pcEp = PodCastEpisodes(podCast, episodes)
+                podCastEpisodesTmp.add(pcEp)
+                podCastEpisodes.value = pcEp
+                checkNextPodCastEpisodes()
+            } else {
+                getFeed(podCast)
+            }
         }
+
+    }
+
+    private fun getFeed(podCast: PodCast) {
+        PkRSS.with(getApplication()).load(podCast.feedUrl).callback(this).async()
     }
 
     override fun onLoadFailed() {
-        println("PkRSS - onLoadFailed")
+        Log.d(TAG, "PkRSS - onLoadFailed")
 
     }
 
     override fun onPreload() {
-        println("PKRSS - onPreload")
+        Log.d(TAG, "PKRSS - onPreload")
     }
 
     override fun onLoaded(newArticles: MutableList<Article>?) {
-        println("PKRSS - " + newArticles?.size)
+        Log.d(TAG, "PKRSS - " + newArticles?.size)
         val podCast = podCastList[indexFetched]
         val episodes: List<Episode>? = newArticles?.take(5)?.map { article ->
             Episode(id = 0,
@@ -57,29 +80,48 @@ class EpisodeListViewModel(application: Application) : AndroidViewModel(applicat
                     podCastId = podCast.id,
                     title = article.title)
         }
-        if (episodes != null) {
-            episodes.forEach { ep ->
-                DataBaseUtils.getAppDataBase(getApplication()).episodeDao().insert(ep)
-            }
-            podCastEpisodesTmp.add(PodCastEpisodes(podCast, episodes))
-        } else {
-            podCastEpisodesTmp.add(PodCastEpisodes(podCast, listOf()))
 
+        val pcEp = if (episodes != null) {
+            episodes.forEach { ep ->
+                val epDao = DataBaseUtils.getAppDataBase(getApplication()).episodeDao()
+                val epDb = epDao.getByApiId(ep.idApi)
+                if (epDb != null) {
+                    ep.id = epDb.id
+                }
+                epDao.insert(ep)
+            }
+            PodCastEpisodes(podCast, episodes)
+        } else {
+            PodCastEpisodes(podCast, listOf())
         }
+        podCastEpisodesTmp.add(pcEp)
+        podCastEpisodes.value = pcEp
         checkNextPodCastEpisodes()
     }
 
     private fun checkNextPodCastEpisodes() {
         indexFetched++
-        if (indexFetched <= podCastList.size - 1) {
-            getEpisodes(podCastList[indexFetched])
+        if (isSyncFinished()) {
+            isUpdating = false
+            forceSync = false
         } else {
-            podCastEpisodes.value = podCastEpisodesTmp
+            fetchEpisodes(podCastList[indexFetched])
         }
     }
 
+    private fun isSyncFinished() = indexFetched > podCastList.size - 1
+
     data class PodCastEpisodes(val podCast: PodCast,
-                               val episodes: List<Episode>)
+                               val episodes: List<Episode>) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other == null || javaClass != other.javaClass) return false
+            val that = other as PodCastEpisodes?
+            return podCast.id == that?.podCast?.id
+        }
+
+        override fun hashCode(): Int = podCast.id.hashCode()
+    }
 }
 
 

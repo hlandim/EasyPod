@@ -16,7 +16,7 @@ import kotlinx.android.synthetic.main.podcast_list_expandeble_group.view.*
 /**
  * Created by hlandim on 16/11/17.
  */
-class PodCastExpandableListAdapter(var list: List<EpisodeListViewModel.PodCastEpisodes>, val context: Context) : BaseExpandableListAdapter() {
+class PodCastExpandableListAdapter(var list: MutableList<EpisodeListViewModel.PodCastEpisodes>, val context: Context) : BaseExpandableListAdapter() {
 
     override fun getGroupView(position: Int, isExpanded: Boolean, convertView: View?, parent: ViewGroup?): View {
 
@@ -53,9 +53,18 @@ class PodCastExpandableListAdapter(var list: List<EpisodeListViewModel.PodCastEp
         return view
     }
 
-    fun update(newList: List<EpisodeListViewModel.PodCastEpisodes>) {
+    fun update(newList: MutableList<EpisodeListViewModel.PodCastEpisodes>) {
         list = newList
         notifyDataSetChanged()
+    }
+
+    fun update(pcEps: EpisodeListViewModel.PodCastEpisodes) {
+        val index = list.indexOf(pcEps)
+        if (index != -1) {
+            list.removeAt(index)
+            list.add(index, pcEps)
+            notifyDataSetChanged()
+        }
     }
 
     override fun hasStableIds(): Boolean = false
@@ -73,9 +82,15 @@ class PodCastExpandableListAdapter(var list: List<EpisodeListViewModel.PodCastEp
 
     override fun getChild(p0: Int, p1: Int): Any = list[p0].episodes[p1]
 
-    override fun getGroupId(p0: Int): Long = p0.toLong()
+    override fun getGroupId(p0: Int): Long = list[p0].podCast.id
 
-    override fun getChildId(p0: Int, p1: Int): Long = p1.toLong()
+    override fun getChildId(p0: Int, p1: Int): Long {
+
+        if (list[p0].episodes.isEmpty()) {
+            return -1
+        }
+        return list[p0].episodes[p1].id
+    }
 
     override fun getGroupCount(): Int = list.size
 }

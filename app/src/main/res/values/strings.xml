@@ -4,4 +4,5 @@
     <string name="add_podcast">Adicione um PodCast</string>
     <string name="podcast_list_layout_list">Lista</string>
     <string name="podcast_list_layout_grid">Grid</string>
+    <string name="podcast_sync">Atualizar</string>
 </resources>
