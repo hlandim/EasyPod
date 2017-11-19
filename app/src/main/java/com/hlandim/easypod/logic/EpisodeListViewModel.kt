@@ -18,9 +18,8 @@ import com.pkmmte.pkrss.PkRSS
 class EpisodeListViewModel(application: Application) : AndroidViewModel(application), Callback {
 
     var podCastEpisodes: MutableLiveData<PodCastEpisodes> = MutableLiveData()
-    private var podCastEpisodesTmp: MutableSet<PodCastEpisodes> = mutableSetOf()
     private var indexFetched: Int = 0
-    private var podCastList: List<PodCast> = listOf()
+    private var podCastList: MutableList<PodCast> = mutableListOf()
     private var forceSync: Boolean = false
     var isUpdating: Boolean = false
 
@@ -38,14 +37,17 @@ class EpisodeListViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     fun fetchEpisodes(podCasts: List<PodCast>) {
-        indexFetched = 0
-        podCastList = podCasts
-        isUpdating = true
-        fetchEpisodes(podCasts[indexFetched])
-
+        if (isUpdating) {
+            podCastList.addAll(podCasts)
+        } else {
+            podCastList = podCasts.toMutableList()
+            indexFetched = 0
+            isUpdating = true
+            fetchEpisodes(podCastList[indexFetched])
+        }
     }
 
-    fun fetchEpisodes(podCast: PodCast) {
+    private fun fetchEpisodes(podCast: PodCast) {
         if (forceSync) {
             getFeed(podCast)
         } else {
@@ -53,7 +55,6 @@ class EpisodeListViewModel(application: Application) : AndroidViewModel(applicat
             Log.d(TAG, "${podCast.title} - episodes from database: ${episodes.size}")
             if (episodes.isNotEmpty()) {
                 val pcEp = PodCastEpisodes(podCast, episodes)
-                podCastEpisodesTmp.add(pcEp)
                 podCastEpisodes.value = pcEp
                 checkNextPodCastEpisodes()
             } else {
@@ -79,15 +80,17 @@ class EpisodeListViewModel(application: Application) : AndroidViewModel(applicat
 
     override fun onLoaded(newArticles: MutableList<Article>?) {
         val podCast = podCastList[indexFetched]
-        val episodes: List<Episode>? = newArticles?.take(5)?.map { article ->
-            Episode(id = 0,
-                    idApi = article.id.toLong(),
-                    podCastId = podCast.id,
-                    title = article.title,
-                    description = article.description,
-                    mimeType = article.enclosure.mimeType,
-                    url = article.enclosure.url)
-        }
+        val episodes: List<Episode>? = newArticles?.take(5)
+                ?.filter { article -> article.enclosure != null }
+                ?.map { article ->
+                    Episode(id = 0,
+                            idApi = article.id.toLong(),
+                            podCastId = podCast.id,
+                            title = article.title,
+                            description = article.description,
+                            mimeType = article.enclosure.mimeType,
+                            url = article.enclosure.url)
+                }
 
         val pcEp = if (episodes != null) {
             episodes.forEach { ep ->
@@ -102,7 +105,6 @@ class EpisodeListViewModel(application: Application) : AndroidViewModel(applicat
         } else {
             PodCastEpisodes(podCast, listOf())
         }
-        podCastEpisodesTmp.add(pcEp)
         podCastEpisodes.value = pcEp
         checkNextPodCastEpisodes()
     }

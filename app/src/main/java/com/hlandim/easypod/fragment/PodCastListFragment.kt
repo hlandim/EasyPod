@@ -4,17 +4,21 @@ import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
+import android.support.constraint.ConstraintLayout
+import android.support.constraint.ConstraintSet
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.GridLayoutManager
+import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.*
 import android.widget.Toast
 import com.hlandim.easypod.R
 import com.hlandim.easypod.activity.search.SearchActivity
 import com.hlandim.easypod.domain.PodCast
-import com.hlandim.easypod.fragment.adapter.PodCastExpandableListAdapter
+import com.hlandim.easypod.fragment.adapter.EpisodesListAdapter
 import com.hlandim.easypod.fragment.adapter.PodCastListAdapter
+import com.hlandim.easypod.fragment.custom.CenterLayoutManager
 import com.hlandim.easypod.logic.EpisodeListViewModel
 import com.hlandim.easypod.logic.PodCastListViewModel
 import kotlinx.android.synthetic.main.fragment_pod_cast_list.*
@@ -28,9 +32,10 @@ class PodCastListFragment : Fragment(), PodCastListAdapter.PodCastListListener {
 
     private var podCastListViewModel: PodCastListViewModel? = null
     private var episodeListViewModel: EpisodeListViewModel? = null
-    private var adapterList: PodCastListAdapter? = null
-    private var adapterExpandable: PodCastExpandableListAdapter? = null
+    private var adapterPodCastList: PodCastListAdapter? = null
+    private var adapterEpisodesList: EpisodesListAdapter? = null
     private var isListViewMode = true
+    private var selectedPodCast: PodCast? = null
 
     companion object {
         val TAG: String = PodCastListFragment::class.java.simpleName
@@ -44,18 +49,21 @@ class PodCastListFragment : Fragment(), PodCastListAdapter.PodCastListListener {
         podCastListViewModel?.getPodCastList()?.observe(activity, Observer<MutableList<PodCast>> { list ->
             if (list != null && list.isNotEmpty()) {
 
-                adapterList?.update(list.map { pc -> PodCastListAdapter.PodCastSync(pc, true) })
+                adapterPodCastList?.update(list.map { pc -> PodCastListAdapter.PodCastSync(pc, true) })
 
-                val expandableList = list.map { podCast -> EpisodeListViewModel.PodCastEpisodes(podCast, listOf()) }.toMutableList()
-                adapterExpandable = PodCastExpandableListAdapter(expandableList, activity)
-                podcast_expandable_list.setAdapter(adapterExpandable)
                 episodeListViewModel?.fetchEpisodes(list)
+
+                onPodCastClicked(list[0], 0)
             }
         })
         episodeListViewModel?.podCastEpisodes?.observe(activity, Observer<EpisodeListViewModel.PodCastEpisodes> { pcEps ->
             if (pcEps != null) {
-                adapterExpandable?.update(pcEps)
-                adapterList?.finishSync(pcEps.podCast)
+                //Updating episodes list
+                if (selectedPodCast != null && selectedPodCast!! == pcEps.podCast) {
+                    adapterEpisodesList?.update(pcEps.episodes)
+                    podcast_title.text = pcEps.podCast.title
+                }
+                adapterPodCastList?.finishSync(pcEps.podCast)
             }
         })
         setHasOptionsMenu(true)
@@ -76,28 +84,20 @@ class PodCastListFragment : Fragment(), PodCastListAdapter.PodCastListListener {
             R.id.action_change_list_layout -> {
                 if (isListViewMode) {
                     item.icon = ContextCompat.getDrawable(activity, R.drawable.view_grid)
-                    podcast_list_grid.visibility = View.GONE
-                    podcast_expandable_list.visibility = View.VISIBLE
                 } else {
-                    podcast_list_grid.visibility = View.VISIBLE
-                    podcast_expandable_list.visibility = View.GONE
                     item.icon = ContextCompat.getDrawable(activity, R.drawable.view_list)
                 }
-
-                isListViewMode = !isListViewMode
+                toogleListLayout()
 
             }
             R.id.action_podcasts_sync -> {
                 if (episodeListViewModel != null && episodeListViewModel!!.isUpdating) {
                     Toast.makeText(activity, "Already updating...", Toast.LENGTH_LONG).show()
-                } else if (adapterExpandable != null && adapterExpandable?.list != null) {
+                } else {
                     Log.i(TAG, "Forcing sync!")
-                    val newExpandableList: MutableList<EpisodeListViewModel.PodCastEpisodes> = mutableListOf()
-                    val list = adapterExpandable!!.list.map { pcEps -> pcEps.podCast }
-                    list.forEach { itemList -> newExpandableList.add(EpisodeListViewModel.PodCastEpisodes(itemList, listOf())) }
-                    adapterExpandable!!.update(newExpandableList)
+                    val list = adapterPodCastList!!.list.map { podCastSync -> podCastSync.podCast }
                     episodeListViewModel?.fetchEpisodes(list, true)
-                    adapterList?.update(list.map { pc -> PodCastListAdapter.PodCastSync(pc, true) })
+                    adapterPodCastList?.update(list.map { pc -> PodCastListAdapter.PodCastSync(pc, true) })
                 }
             }
         }
@@ -105,6 +105,32 @@ class PodCastListFragment : Fragment(), PodCastListAdapter.PodCastListListener {
 
 
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun toogleListLayout() {
+        if (isListViewMode) {
+
+            //Hiding episodes list
+            container_episodes.visibility = View.GONE
+
+            //Configuring Grid
+            val layoutManager = GridLayoutManager(activity, 4)
+            podcast_list.layoutManager = layoutManager
+
+            //Setting constraint in recycleView
+            val constraintSet = ConstraintSet()
+            constraintSet.clone(constraint_root)
+            constraintSet.connect(podcast_list.id, ConstraintSet.TOP, fabAddPodCast.id, ConstraintSet.BOTTOM)
+            constraintSet.applyTo(constraint_root)
+            podcast_list.layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.MATCH_PARENT)
+
+        } else {
+            container_episodes.visibility = View.VISIBLE
+            val layoutManager = CenterLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false)
+            podcast_list.layoutManager = layoutManager
+        }
+
+        isListViewMode = !isListViewMode
     }
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
@@ -121,17 +147,18 @@ class PodCastListFragment : Fragment(), PodCastListAdapter.PodCastListListener {
     }
 
     private fun configurePodCastList() {
-        adapterList = PodCastListAdapter(listOf(), this.activity, this)
-        podcast_list_grid.adapter = adapterList
-        val layoutManager = GridLayoutManager(this.context, 4)
-        podcast_list_grid.layoutManager = layoutManager
-        if (isListViewMode) {
-            podcast_list_grid.visibility = View.VISIBLE
-            podcast_expandable_list.visibility = View.GONE
-        } else {
-            podcast_list_grid.visibility = View.GONE
-            podcast_expandable_list.visibility = View.VISIBLE
-        }
+        adapterPodCastList = PodCastListAdapter(listOf(), this.activity, this)
+        podcast_list.adapter = adapterPodCastList
+        var layoutManager = CenterLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false)
+        podcast_list.layoutManager = layoutManager
+
+        toogleListLayout()
+
+        layoutManager = CenterLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+        episodes_list.layoutManager = layoutManager
+
+        adapterEpisodesList = EpisodesListAdapter(listOf(), activity)
+        episodes_list.adapter = adapterEpisodesList
     }
 
 
@@ -140,8 +167,11 @@ class PodCastListFragment : Fragment(), PodCastListAdapter.PodCastListListener {
         podCastListViewModel?.listSubscribedPodCasts()
     }
 
-    override fun onPodCastClicked(podCast: PodCast) {
-        Toast.makeText(activity, "Wait for it!!", Toast.LENGTH_LONG).show()
+    override fun onPodCastClicked(podCast: PodCast, position: Int) {
+        selectedPodCast = podCast
+        episodeListViewModel?.fetchEpisodes(listOf(podCast))
+        podcast_list.smoothScrollToPosition(position)
+
     }
 
     override fun onPodCastRemoveClicked(podCast: PodCast) {

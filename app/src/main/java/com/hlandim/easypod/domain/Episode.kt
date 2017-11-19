@@ -14,7 +14,7 @@ class Episode(@PrimaryKey(autoGenerate = true) var id: Long = 0,
               @ColumnInfo(name = "id_api") var idApi: Long = 0,
               @ColumnInfo(name = "title") var title: String = "",
               @ColumnInfo(name = "podcast_id") var podCastId: Long,
-              @ColumnInfo(name = "description") var description: String,
+              @ColumnInfo(name = "description") var description: String?,
               @ColumnInfo(name = "mime_type") var mimeType: String,
               @ColumnInfo(name = "url") var url: String
 ) {

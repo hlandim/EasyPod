@@ -1,6 +1,7 @@
 package com.hlandim.easypod.fragment.adapter
 
 import android.content.Context
+import android.support.v4.view.ViewCompat
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -16,6 +17,8 @@ import kotlinx.android.synthetic.main.podcast_list_item_grid.view.*
  */
 class PodCastListAdapter(var list: List<PodCastSync>, private val context: Context, private val listener: PodCastListListener) : RecyclerView.Adapter<PodCastListAdapter.ListHolder>() {
 
+    private var clickEdPosition = 0;
+
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ListHolder {
 
         val view = LayoutInflater.from(context).inflate(R.layout.podcast_list_item_grid, parent, false)
@@ -24,10 +27,15 @@ class PodCastListAdapter(var list: List<PodCastSync>, private val context: Conte
 
     override fun onBindViewHolder(holder: ListHolder?, position: Int) {
         val podCastSync = list[position]
-
         val podCast = podCastSync.podCast
         Glide.with(context).load(podCast.imgThumbUrl).into(holder?.img)
-        holder?.itemView?.setOnClickListener { listener.onPodCastClicked(podCast) }
+        holder?.itemView?.setOnClickListener { view ->
+            listener.onPodCastClicked(podCast, position)
+
+            clickEdPosition = position
+
+            notifyDataSetChanged()
+        }
         holder?.pbSync?.visibility = if (podCastSync.isSyncing) View.VISIBLE else View.GONE
 
         holder?.itemView?.setOnLongClickListener { view ->
@@ -41,6 +49,14 @@ class PodCastListAdapter(var list: List<PodCastSync>, private val context: Conte
             }
             popUpMenu.show()
             true
+        }
+
+        if (clickEdPosition == position) {
+//            val parms = holder?.itemView?.layoutParams
+//            parms?.width = parms?.width!! + 30
+//            parms.height = parms.height + 30
+//            holder.itemView.layoutParams = parms
+//            ViewCompat.setElevation(holder.itemView, 30F)
         }
     }
 
@@ -67,7 +83,7 @@ class PodCastListAdapter(var list: List<PodCastSync>, private val context: Conte
     }
 
     interface PodCastListListener {
-        fun onPodCastClicked(podCast: PodCast)
+        fun onPodCastClicked(podCast: PodCast, position: Int)
         fun onPodCastRemoveClicked(podCast: PodCast)
     }
 
