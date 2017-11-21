@@ -29,8 +29,19 @@ class SearchActivity : AppCompatActivity(), SearchListAdapter.SearchListListener
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
         setSupportActionBar(my_toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
+        my_toolbar.setNavigationOnClickListener {
+            onBackPressed()
+        }
+
         configureList()
         configureViewModel()
+    }
+
+    override fun onNavigateUp(): Boolean {
+        onBackPressed()
+        return super.onNavigateUp()
     }
 
     private fun configureViewModel() {

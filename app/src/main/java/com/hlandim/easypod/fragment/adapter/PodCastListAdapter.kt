@@ -1,7 +1,7 @@
 package com.hlandim.easypod.fragment.adapter
 
 import android.content.Context
-import android.support.v4.view.ViewCompat
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -17,7 +17,7 @@ import kotlinx.android.synthetic.main.podcast_list_item_grid.view.*
  */
 class PodCastListAdapter(var list: List<PodCastSync>, private val context: Context, private val listener: PodCastListListener) : RecyclerView.Adapter<PodCastListAdapter.ListHolder>() {
 
-    private var clickEdPosition = 0;
+    private var clickedPosition = 0;
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ListHolder {
 
@@ -29,10 +29,10 @@ class PodCastListAdapter(var list: List<PodCastSync>, private val context: Conte
         val podCastSync = list[position]
         val podCast = podCastSync.podCast
         Glide.with(context).load(podCast.imgThumbUrl).into(holder?.img)
-        holder?.itemView?.setOnClickListener { view ->
+        holder?.itemView?.setOnClickListener {
             listener.onPodCastClicked(podCast, position)
 
-            clickEdPosition = position
+            clickedPosition = position
 
             notifyDataSetChanged()
         }
@@ -51,7 +51,8 @@ class PodCastListAdapter(var list: List<PodCastSync>, private val context: Conte
             true
         }
 
-        if (clickEdPosition == position) {
+        if (clickedPosition == position) {
+            holder?.itemView?.setBackgroundColor(ContextCompat.getColor(context, R.color.search_background_overlay))
 //            val parms = holder?.itemView?.layoutParams
 //            parms?.width = parms?.width!! + 30
 //            parms.height = parms.height + 30
