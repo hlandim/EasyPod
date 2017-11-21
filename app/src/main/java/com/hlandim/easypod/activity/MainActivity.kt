@@ -22,15 +22,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        setSupportActionBar(my_toolbar)
+        configureDrawer()
 
-        val toggle = ActionBarDrawerToggle(
-                this, drawer_layout, my_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-        drawer_layout.addDrawerListener(toggle)
-        toggle.syncState()
+        startFragment()
 
-        nav_view.setNavigationItemSelectedListener(this)
+    }
 
+    private fun startFragment() {
         var fragment = supportFragmentManager.findFragmentByTag(FRAGMENT_TAG)
         if (fragment == null) {
             fragment = MainFragment()
@@ -45,7 +43,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     .commit()
 
         }
+    }
 
+    private fun configureDrawer() {
+        setSupportActionBar(my_toolbar)
+
+        val toggle = ActionBarDrawerToggle(
+                this, drawer_layout, my_toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
+        drawer_layout.addDrawerListener(toggle)
+        toggle.syncState()
+
+        nav_view.setNavigationItemSelectedListener(this)
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {

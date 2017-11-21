@@ -103,6 +103,10 @@ class PodCastListFragment : MainTabLayoutFragment(), PodCastListAdapter.PodCastL
                     adapterPodCastList?.update(list.map { pc -> PodCastListAdapter.PodCastSync(pc, true) })
                 }
             }
+            R.id.action_add_podcast -> {
+                val intent = Intent(activity, SearchActivity::class.java)
+                startActivity(intent)
+            }
         }
 
 
@@ -119,14 +123,12 @@ class PodCastListFragment : MainTabLayoutFragment(), PodCastListAdapter.PodCastL
             //Configuring Grid
             val layoutManager = GridLayoutManager(activity, calculateNoOfColumns(activity))
             podcast_list.layoutManager = layoutManager
-
-            //Setting constraint in recycleView
             val constraintSet = ConstraintSet()
             constraintSet.clone(constraint_root)
-            constraintSet.connect(podcast_list.id, ConstraintSet.TOP, fabAddPodCast.id, ConstraintSet.BOTTOM)
+            constraintSet.connect(podcast_list.id, ConstraintSet.TOP, constraint_root.id, ConstraintSet.BOTTOM)
             constraintSet.applyTo(constraint_root)
-            podcast_list.layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.MATCH_PARENT)
-            podcast_list.addItemDecoration(SpacesItemDecoration(3))
+            podcast_list.layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.WRAP_CONTENT)
+            //Setting constraint in recycleView
 
         } else {
             container_episodes.visibility = View.VISIBLE
@@ -140,14 +142,6 @@ class PodCastListFragment : MainTabLayoutFragment(), PodCastListAdapter.PodCastL
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         configurePodCastList()
-        configureFabAddButton()
-    }
-
-    private fun configureFabAddButton() {
-        fabAddPodCast.setOnClickListener {
-            val intent = Intent(activity, SearchActivity::class.java)
-            startActivity(intent)
-        }
     }
 
     private fun configurePodCastList() {
@@ -163,6 +157,8 @@ class PodCastListFragment : MainTabLayoutFragment(), PodCastListAdapter.PodCastL
 
         adapterEpisodesList = EpisodesListAdapter(listOf(), activity)
         episodes_list.adapter = adapterEpisodesList
+
+        podcast_list.addItemDecoration(SpacesItemDecoration(3))
     }
 
 

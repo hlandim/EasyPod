@@ -1,6 +1,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+
+
+    <item
+        android:id="@+id/action_add_podcast"
+        android:icon="@drawable/ic_add"
+        android:title="@string/add_podcast"
+        app:showAsAction="ifRoom" />
+
     <item
         android:id="@+id/action_podcasts_sync"
         android:icon="@drawable/ic_sync"
