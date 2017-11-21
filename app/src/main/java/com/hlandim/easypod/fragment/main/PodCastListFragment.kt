@@ -1,4 +1,4 @@
-package com.hlandim.easypod.fragment
+package com.hlandim.easypod.fragment.main
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
@@ -30,8 +30,7 @@ import kotlinx.android.synthetic.main.fragment_pod_cast_list.*
  * Created by hlandim on 08/11/17.
  */
 
-class PodCastListFragment : Fragment(), PodCastListAdapter.PodCastListListener {
-
+class PodCastListFragment : MainTabLayoutFragment(), PodCastListAdapter.PodCastListListener {
 
     private var podCastListViewModel: PodCastListViewModel? = null
     private var episodeListViewModel: EpisodeListViewModel? = null
@@ -190,4 +189,6 @@ class PodCastListFragment : Fragment(), PodCastListAdapter.PodCastListListener {
         val sizeOfGridItem = 80
         return (dpWidth / sizeOfGridItem).toInt()
     }
+
+    override fun getTabName(): String = "PodCast"
 }

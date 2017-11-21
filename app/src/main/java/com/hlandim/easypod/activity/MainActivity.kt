@@ -6,7 +6,7 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
 import com.hlandim.easypod.R
-import com.hlandim.easypod.fragment.PodCastListFragment
+import com.hlandim.easypod.fragment.main.MainFragment
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.toolbar.*
 
@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         var fragment = supportFragmentManager.findFragmentByTag(FRAGMENT_TAG)
         if (fragment == null) {
-            fragment = PodCastListFragment()
+            fragment = MainFragment()
             supportFragmentManager
                     .beginTransaction()
                     .add(R.id.fragments_container, fragment, FRAGMENT_TAG)
