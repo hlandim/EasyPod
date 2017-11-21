@@ -2,6 +2,7 @@ package com.hlandim.easypod.fragment
 
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
@@ -19,9 +20,11 @@ import com.hlandim.easypod.domain.PodCast
 import com.hlandim.easypod.fragment.adapter.EpisodesListAdapter
 import com.hlandim.easypod.fragment.adapter.PodCastListAdapter
 import com.hlandim.easypod.fragment.custom.CenterLayoutManager
+import com.hlandim.easypod.fragment.custom.SpacesItemDecoration
 import com.hlandim.easypod.logic.EpisodeListViewModel
 import com.hlandim.easypod.logic.PodCastListViewModel
 import kotlinx.android.synthetic.main.fragment_pod_cast_list.*
+
 
 /**
  * Created by hlandim on 08/11/17.
@@ -56,6 +59,7 @@ class PodCastListFragment : Fragment(), PodCastListAdapter.PodCastListListener {
                 onPodCastClicked(list[0], 0)
             }
         })
+
         episodeListViewModel?.podCastEpisodes?.observe(activity, Observer<EpisodeListViewModel.PodCastEpisodes> { pcEps ->
             if (pcEps != null) {
                 //Updating episodes list
@@ -87,7 +91,7 @@ class PodCastListFragment : Fragment(), PodCastListAdapter.PodCastListListener {
                 } else {
                     item.icon = ContextCompat.getDrawable(activity, R.drawable.view_list)
                 }
-                toogleListLayout()
+                toggleListLayout()
 
             }
             R.id.action_podcasts_sync -> {
@@ -107,14 +111,14 @@ class PodCastListFragment : Fragment(), PodCastListAdapter.PodCastListListener {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun toogleListLayout() {
+    private fun toggleListLayout() {
         if (isListViewMode) {
 
             //Hiding episodes list
             container_episodes.visibility = View.GONE
 
             //Configuring Grid
-            val layoutManager = GridLayoutManager(activity, 4)
+            val layoutManager = GridLayoutManager(activity, calculateNoOfColumns(activity))
             podcast_list.layoutManager = layoutManager
 
             //Setting constraint in recycleView
@@ -123,6 +127,7 @@ class PodCastListFragment : Fragment(), PodCastListAdapter.PodCastListListener {
             constraintSet.connect(podcast_list.id, ConstraintSet.TOP, fabAddPodCast.id, ConstraintSet.BOTTOM)
             constraintSet.applyTo(constraint_root)
             podcast_list.layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.MATCH_PARENT)
+            podcast_list.addItemDecoration(SpacesItemDecoration(3))
 
         } else {
             container_episodes.visibility = View.VISIBLE
@@ -136,10 +141,10 @@ class PodCastListFragment : Fragment(), PodCastListAdapter.PodCastListListener {
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         configurePodCastList()
-        configureFabAddButtom()
+        configureFabAddButton()
     }
 
-    private fun configureFabAddButtom() {
+    private fun configureFabAddButton() {
         fabAddPodCast.setOnClickListener {
             val intent = Intent(activity, SearchActivity::class.java)
             startActivity(intent)
@@ -152,7 +157,7 @@ class PodCastListFragment : Fragment(), PodCastListAdapter.PodCastListListener {
         var layoutManager = CenterLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false)
         podcast_list.layoutManager = layoutManager
 
-        toogleListLayout()
+        toggleListLayout()
 
         layoutManager = CenterLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
         episodes_list.layoutManager = layoutManager
@@ -177,5 +182,12 @@ class PodCastListFragment : Fragment(), PodCastListAdapter.PodCastListListener {
     override fun onPodCastRemoveClicked(podCast: PodCast) {
         episodeListViewModel?.deleteAllFromPodCast(podCast)
         podCastListViewModel?.delete(podCast)
+    }
+
+    fun calculateNoOfColumns(context: Context): Int {
+        val displayMetrics = context.resources.displayMetrics
+        val dpWidth = displayMetrics.widthPixels / displayMetrics.density
+        val sizeOfGridItem = 80
+        return (dpWidth / sizeOfGridItem).toInt()
     }
 }
