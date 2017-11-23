@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.constraint.ConstraintLayout
 import android.support.constraint.ConstraintSet
-import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
