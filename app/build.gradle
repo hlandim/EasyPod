@@ -71,7 +71,7 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
 
     //ANDROID DEBUG DATABASE
-    debugCompile 'com.amitshekhar.android:debug-db:1.0.1'
+    debugImplementation 'com.amitshekhar.android:debug-db:1.0.1'
 
     //ExoPlayer
     implementation 'com.google.android.exoplayer:exoplayer:r2.5.4'
